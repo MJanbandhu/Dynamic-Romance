@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WELCOME My HIGHNESS</title>
+  <meta name="description" content="An interactive romantic experience created with love.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Outfit:wght@300;400;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+
+  <!-- Chart.js for Admin Dashboard -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="shortcut icon" href="assets/svg/heart.svg" type="image/svg+xml">
+</head>
+<body>
+
+  <!-- Fullscreen Interactive Canvas for Romantic Particle Effects -->
+  <canvas id="bgCanvas"></canvas>
+  <canvas id="fxCanvas"></canvas>
+
+  <!-- Overlay Audio Toggle & Admin Lock -->
+  <header class="app-header">
+    <button id="soundToggleBtn" class="glass-btn icon-btn" title="Toggle Romantic Ambient Music">
+      <span class="btn-icon">🎵</span>
+      <span id="soundLabel">Sound: Off</span>
+    </button>
+    <button id="adminBtn" class="glass-btn icon-btn" title="Open Admin Dashboard">
+      <span class="btn-icon">🔐</span>
+      <span>Admin</span>
+    </button>
+  </header>
+
+  <!-- Popup Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="app-container">
+
+    <!-- SCREEN 1: LANDING / GREETING SCREEN -->
+    <section id="landingScreen" class="screen active">
+      <div class="glass-card landing-card">
+        <div class="sparkle-badge">✨ Specially for You ✨</div>
+        <h1 class="welcome-heading animated-glow">WELCOME DAAAAAA</h1>
+        <div class="greeting-box">
+          <p id="greetingText" class="greeting-text">Good Morning My Gorgeous Lady</p>
+        </div>
+        <div class="heart-pulse-icon">💖</div>
+        <div class="progress-bar-container">
+          <div id="landingProgress" class="progress-bar"></div>
+        </div>
+        <p class="sub-hint">Preparing something sweet for you...DAAAA</p>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: QUESTION SCREEN ("Are you going to KISS me?") -->
+    <section id="questionScreen" class="screen hidden">
+      <div class="glass-card question-card">
+        <div class="heart-crown">👑</div>
+        <h1 class="question-heading">Are you going to KISS (Pappieee) me?</h1>
+        <p class="question-sub">There's only one correct answer, Cutie! 😉</p>
+
+        <div class="buttons-container" id="buttonsBox">
+          <button id="yesBtn" class="glow-btn yes-btn">
+            <span class="btn-heart">💋</span>
+            <span class="btn-text">YES!</span>
+          </button>
+          
+          <button id="noBtn" class="glow-btn no-btn">
+            <span class="btn-text">NO</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: KISS SELECTION SCREEN -->
+    <section id="kissScreen" class="screen hidden">
+      <div class="kiss-header-box">
+        <h1 class="kiss-heading">Choose Where You Want to Kiss</h1>
+        <p class="kiss-sub">Click on any card to give me your kiss 💋</p>
+      </div>
+
+      <div class="kiss-grid">
+        <!-- Forehead Card -->
+        <div class="kiss-card glass-card" data-category="Forehead">
+          <div class="kiss-icon">👑</div>
+          <h3>Forehead</h3>
+          <p>Gentle & Sweet</p>
+          <div class="kiss-sparkle">✨</div>
+        </div>
+
+        <!-- Cheek Card -->
+        <div class="kiss-card glass-card" data-category="Cheek">
+          <div class="kiss-icon">😊</div>
+          <h3>Cheek</h3>
+          <p>Cute & Playful</p>
+          <div class="kiss-sparkle">✨</div>
+        </div>
+
+        <!-- Nose Card -->
+        <div class="kiss-card glass-card" data-category="Nose">
+          <div class="kiss-icon">👃</div>
+          <h3>Nose</h3>
+          <p>Adorably Boopable</p>
+          <div class="kiss-sparkle">✨</div>
+        </div>
+
+        <!-- Lips Card -->
+        <div class="kiss-card glass-card" data-category="Lips">
+          <div class="kiss-icon">💋</div>
+          <h3>Lips</h3>
+          <p>Passionate & Romantic</p>
+          <div class="kiss-sparkle">✨</div>
+        </div>
+
+        <!-- Neck Card -->
+        <div class="kiss-card glass-card" data-category="Neck">
+          <div class="kiss-icon">🦒</div>
+          <h3>Neck</h3>
+          <p>Warm & Tingling</p>
+          <div class="kiss-sparkle">✨</div>
+        </div>
+
+        <!-- Eyes Card -->
+        <div class="kiss-card glass-card" data-category="Eyes">
+          <div class="kiss-icon">👁️</div>
+          <h3>Eyes</h3>
+          <p>Deeply Tender</p>
+          <div class="kiss-sparkle">✨</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CUSTOM ANIMATION OVERLAY FOR KISSES -->
+    <div id="kissAnimOverlay" class="kiss-anim-overlay hidden">
+      <div class="kiss-anim-content" id="kissAnimContent">
+        <!-- Dynamic SVG / Animation inserted here via JS -->
+      </div>
+    </div>
+
+    <!-- SCREEN 4: FINAL CELEBRATION SCREEN -->
+    <section id="finalScreen" class="screen hidden">
+      <div class="glass-card final-card">
+        <h1 id="finalText" class="final-heading">I I. I.. I... I.... ....</h1>
+        <div class="final-subtext">Forever and Always Yours 💖</div>
+
+        <div class="floating-emojis-container" id="finalEmojisBox">
+          <span class="float-item">💖</span>
+          <span class="float-item">🌹</span>
+          <span class="float-item">💋</span>
+          <span class="float-item">✨</span>
+          <span class="float-item">🎈</span>
+        </div>
+
+        <div class="timer-display" id="finalTimerDisplay">Continuing romantic magic... 15s</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ADMIN DASHBOARD MODAL -->
+  <div id="adminModal" class="modal-overlay hidden">
+    <div class="modal-container glass-card">
+      <div class="modal-header">
+        <h2>🔐 Admin Analytics Dashboard</h2>
+        <button id="closeAdminModal" class="close-btn">&times;</button>
+      </div>
+
+      <!-- Admin Login Form -->
+      <div id="adminLoginForm" class="admin-login-box">
+        <p>Enter the admin password to access visitor tracking and statistics.</p>
+        <div class="form-group">
+          <input type="password" id="adminPasswordInput" placeholder="Enter Admin Password" class="glass-input">
+          <button id="adminLoginSubmitBtn" class="glow-btn">Login</button>
+        </div>
+        <p id="adminLoginError" class="error-msg hidden">Invalid Password. Please try again.</p>
+      </div>
+
+      <!-- Admin Dashboard Content (Hidden until authenticated) -->
+      <div id="adminDashboardContent" class="admin-dashboard-content hidden">
+
+        <!-- Stat Cards Summary Grid -->
+        <div class="stats-grid">
+          <div class="stat-card glass-card">
+            <h4>Total Visitors</h4>
+            <div id="statTotalVisitors" class="stat-num">0</div>
+          </div>
+          <div class="stat-card glass-card">
+            <h4>Today's Visitors</h4>
+            <div id="statTodayVisitors" class="stat-num">0</div>
+          </div>
+          <div class="stat-card glass-card">
+            <h4>YES Clicks</h4>
+            <div id="statYesClicks" class="stat-num">0</div>
+          </div>
+          <div class="stat-card glass-card">
+            <h4>NO Attempts</h4>
+            <div id="statNoAttempts" class="stat-num">0</div>
+          </div>
+          <div class="stat-card glass-card">
+            <h4>Favorite Kiss</h4>
+            <div id="statFavoriteKiss" class="stat-num text-sm">None</div>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+          <div class="chart-container glass-card">
+            <h5>Kiss Choices</h5>
+            <canvas id="kissChart"></canvas>
+          </div>
+          <div class="chart-container glass-card">
+            <h5>Device Types</h5>
+            <canvas id="deviceChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Visitor Activity Table Section -->
+        <div class="table-header-bar">
+          <h3>Visitor Logs</h3>
+          <div class="table-actions">
+            <input type="text" id="visitorSearchInput" placeholder="Search IP, Session, Country..." class="glass-input search-input">
+            <button id="exportCsvBtn" class="glass-btn download-btn">📥 Export CSV</button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Time</th>
+                <th>IP / Country</th>
+                <th>Browser / OS</th>
+                <th>Greeting</th>
+                <th>YES Clicked</th>
+                <th>NO Attempts</th>
+                <th>Kiss Choice</th>
+                <th>Duration</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="visitorTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-container">
+          <button id="prevPageBtn" class="glass-btn pagination-btn">◀ Previous</button>
+          <span id="pageInfo">Page 1 of 1</span>
+          <button id="nextPageBtn" class="glass-btn pagination-btn">Next ▶</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript App Script -->
+  <script src="script.js"></script>
+</body>
+</html>
