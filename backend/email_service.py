@@ -11,6 +11,7 @@ def send_email_notification(subject, html_content):
     api_key = Config.RESEND_API_KEY
     to_email = Config.TO_EMAIL
     from_email = Config.FROM_EMAIL
+    
 
     if not api_key or not to_email:
         logger.info(f"[Email Notification Skipped - Missing Credentials] Subject: {subject}")
