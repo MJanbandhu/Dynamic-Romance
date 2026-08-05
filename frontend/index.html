@@ -197,7 +197,7 @@
         <button id="adminLoginSubmitBtn" class="glow-btn admin-login-btn">Login</button>
       </div> -->
 
-      <!-- Admin Login Form -->
+      <!-- Admin Login Form 
       <div id="adminLoginForm" class="admin-login-box">
         <p>Enter the admin password to access visitor tracking and statistics.</p>
         <div class="form-group">
@@ -205,6 +205,33 @@
           <button id="adminLoginSubmitBtn" class="glow-btn">Login</button>
         </div>
         <p id="adminLoginError" class="error-msg hidden">Invalid Password. Please try again.</p>
+      </div> -->
+
+
+      <!-- Admin Login Form -->
+      <div id="adminLoginForm" class="admin-login-box">
+          <p>Enter the admin password to access visitor tracking and statistics.</p>
+
+          <div class="form-group admin-login-group">
+              <input
+                  type="password"
+                  id="adminPasswordInput"
+                  placeholder="Enter Admin Password"
+                  class="glass-input"
+                  autocomplete="current-password"
+              >
+
+              <button
+                  id="adminLoginSubmitBtn"
+                  class="glow-btn admin-login-btn"
+              >
+                  Login
+              </button>
+          </div>
+
+          <p id="adminLoginError" class="error-msg hidden">
+              Invalid Password. Please try again.
+          </p>
       </div>
 
       <!-- Admin Dashboard Content (Hidden until authenticated) -->
