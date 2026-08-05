@@ -1,11 +1,11 @@
 import io
 import csv
-from datetime import datetime, timedelta
-from flask import Blueprint, request, jsonify, make_response
+from datetime import timedelta, timezone
+from flask import Blueprint, request, jsonify, make_response, session
 from backend.database import db
 from backend.models import Visitor, Activity
 from backend.config import Config
-from backend.utils import get_client_ip, parse_user_agent, get_country_by_ip
+from backend.utils import get_client_ip, parse_user_agent, get_country_by_ip, get_ist_now, IST
 from backend.email_service import (
     send_new_visitor_email,
     send_yes_clicked_email,
@@ -15,8 +15,17 @@ from backend.email_service import (
 
 api = Blueprint('api', __name__, url_prefix='/api')
 
+
 def verify_admin_auth(req):
-    """Check Authorization header or query token against ADMIN_PASSWORD."""
+    """
+    Check admin authentication via:
+    1. Flask session (set on successful /api/admin/login)
+    2. Authorization header or query token as fallback (for CSV export links)
+    """
+    # Primary: check Flask session
+    if session.get('admin_logged_in'):
+        return True
+    # Fallback: check Authorization header or query token (used by export CSV links)
     token = req.headers.get("Authorization") or req.args.get("token")
     if not token:
         return False
@@ -24,6 +33,10 @@ def verify_admin_auth(req):
         token = token.split(" ")[1]
     return token == Config.ADMIN_PASSWORD
 
+
+# ==========================================================================
+# VISITOR TRACKING APIS (unchanged)
+# ==========================================================================
 
 @api.route('/visit', methods=['POST'])
 def record_visit():
@@ -48,7 +61,7 @@ def record_visit():
             screen_resolution=data.get("screen_resolution", "Unknown"),
             greeting=data.get("greeting", ""),
             adjective=data.get("adjective", ""),
-            visit_timestamp=datetime.utcnow()
+            visit_timestamp=get_ist_now()   # IST timestamp
         )
         db.session.add(visitor)
     else:
@@ -62,7 +75,8 @@ def record_visit():
     activity = Activity(
         session_id=session_id,
         event_name="VISIT_STARTED",
-        details=f"Greeting: {data.get('greeting')} | Adjective: {data.get('adjective')}"
+        details=f"Greeting: {data.get('greeting')} | Adjective: {data.get('adjective')}",
+        timestamp=get_ist_now()   # IST timestamp
     )
     db.session.add(activity)
     db.session.commit()
@@ -86,7 +100,8 @@ def record_no_attempt():
         activity = Activity(
             session_id=session_id,
             event_name="NO_ATTEMPT",
-            details=f"NO Hover/Tap Count: {visitor.no_attempt_count}"
+            details=f"NO Hover/Tap Count: {visitor.no_attempt_count}",
+            timestamp=get_ist_now()
         )
         db.session.add(activity)
         db.session.commit()
@@ -105,11 +120,12 @@ def record_yes_click():
     visitor = Visitor.query.filter_by(session_id=session_id).first()
     if visitor:
         visitor.yes_clicked = True
-        visitor.yes_clicked_at = datetime.utcnow()
+        visitor.yes_clicked_at = get_ist_now()   # IST timestamp
         activity = Activity(
             session_id=session_id,
             event_name="YES_CLICKED",
-            details="User clicked YES on Question Screen"
+            details="User clicked YES on Question Screen",
+            timestamp=get_ist_now()
         )
         db.session.add(activity)
         db.session.commit()
@@ -133,11 +149,12 @@ def record_kiss_selection():
     visitor = Visitor.query.filter_by(session_id=session_id).first()
     if visitor:
         visitor.kiss_category = kiss_category
-        visitor.kiss_selected_at = datetime.utcnow()
+        visitor.kiss_selected_at = get_ist_now()   # IST timestamp
         activity = Activity(
             session_id=session_id,
             event_name="KISS_SELECTED",
-            details=f"Selected kiss option: {kiss_category}"
+            details=f"Selected kiss option: {kiss_category}",
+            timestamp=get_ist_now()
         )
         db.session.add(activity)
         db.session.commit()
@@ -160,12 +177,13 @@ def record_complete_visit():
 
     visitor = Visitor.query.filter_by(session_id=session_id).first()
     if visitor:
-        visitor.final_timestamp = datetime.utcnow()
+        visitor.final_timestamp = get_ist_now()   # IST timestamp
         visitor.visit_duration = float(duration)
         activity = Activity(
             session_id=session_id,
             event_name="VISIT_COMPLETED",
-            details=f"Duration: {duration}s"
+            details=f"Duration: {duration}s",
+            timestamp=get_ist_now()
         )
         db.session.add(activity)
         db.session.commit()
@@ -177,16 +195,55 @@ def record_complete_visit():
     return jsonify({"error": "Visitor not found"}), 404
 
 
-# ------------------- ADMIN DASHBOARD APIS -------------------
+# ==========================================================================
+# ADMIN AUTHENTICATION APIS
+# ==========================================================================
 
 @api.route('/admin/login', methods=['POST'])
 def admin_login():
+    """
+    Secure admin login via Flask session.
+    Validates password against ADMIN_PASSWORD environment variable.
+    On success, sets session['admin_logged_in'] = True.
+    """
     data = request.get_json() or {}
     password = data.get("password", "")
+
     if password == Config.ADMIN_PASSWORD:
+        # Set secure Flask session
+        session['admin_logged_in'] = True
+        session.permanent = True  # respect PERMANENT_SESSION_LIFETIME
+        # Return token for CSV export fallback (Authorization header)
         return jsonify({"status": "success", "token": Config.ADMIN_PASSWORD}), 200
+
     return jsonify({"status": "error", "message": "Invalid Password"}), 401
 
+
+@api.route('/admin/logout', methods=['POST'])
+def admin_logout():
+    """
+    Destroy the admin session on logout.
+    Redirects back to login via frontend.
+    """
+    session.pop('admin_logged_in', None)
+    session.clear()
+    return jsonify({"status": "success", "message": "Logged out successfully"}), 200
+
+
+@api.route('/admin/check-auth', methods=['GET'])
+def admin_check_auth():
+    """
+    Check if the current request has a valid admin session.
+    Used by frontend to gate direct URL access to dashboard.
+    """
+    if session.get('admin_logged_in'):
+        return jsonify({"authenticated": True}), 200
+    return jsonify({"authenticated": False}), 401
+
+
+# ==========================================================================
+# ADMIN DASHBOARD APIS (protected by verify_admin_auth)
+# ==========================================================================
 
 @api.route('/admin/statistics', methods=['GET'])
 def get_statistics():
@@ -195,9 +252,12 @@ def get_statistics():
 
     total_visitors = Visitor.query.count()
     
-    # Today's visitors
-    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
-    today_visitors = Visitor.query.filter(Visitor.visit_timestamp >= today_start).count()
+    # Today's visitors — calculated in IST (midnight Asia/Kolkata)
+    now_ist = get_ist_now()
+    today_start_ist = now_ist.replace(hour=0, minute=0, second=0, microsecond=0)
+    # Convert IST midnight back to naive datetime for DB comparison
+    # (DB stores IST-based datetimes; since we store as-is, compare directly)
+    today_visitors = Visitor.query.filter(Visitor.visit_timestamp >= today_start_ist).count()
     
     yes_clicks = Visitor.query.filter_by(yes_clicked=True).count()
     
@@ -309,15 +369,15 @@ def export_csv():
     writer.writerow([
         "ID", "Session ID", "IP Address", "Country", "Browser", 
         "Operating System", "Device Type", "Screen Resolution", 
-        "Greeting", "Adjective", "Visit Timestamp", "YES Clicked", 
-        "NO Attempt Count", "Kiss Category", "Final Timestamp", "Visit Duration (s)"
+        "Greeting", "Adjective", "Visit Timestamp (IST)", "YES Clicked", 
+        "NO Attempt Count", "Kiss Category", "Final Timestamp (IST)", "Visit Duration (s)"
     ])
 
     for v in visitors:
         writer.writerow([
             v.id, v.session_id, v.ip_address, v.country, v.browser,
             v.operating_system, v.device_type, v.screen_resolution,
-            v.greeting, v.adjective, 
+            v.greeting, v.adjective,
             v.visit_timestamp.isoformat() if v.visit_timestamp else "",
             v.yes_clicked, v.no_attempt_count, v.kiss_category or "",
             v.final_timestamp.isoformat() if v.final_timestamp else "",

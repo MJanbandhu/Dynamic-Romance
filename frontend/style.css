@@ -61,6 +61,31 @@ body {
   display: flex;
   gap: 12px;
   z-index: 100;
+  align-items: center;
+}
+
+/* Hides the home button in the header until celebration ends */
+.header-hidden {
+  display: none !important;
+}
+
+/* Home button in header — pink accent to distinguish it */
+.home-header-btn {
+  background: rgba(255, 64, 129, 0.18);
+  border-color: rgba(255, 105, 180, 0.45);
+  color: #fff;
+  animation: homeBtnAppear 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.home-header-btn:hover {
+  background: rgba(255, 64, 129, 0.38);
+  border-color: var(--accent-pink);
+  box-shadow: 0 0 22px var(--accent-glow);
+}
+
+@keyframes homeBtnAppear {
+  0%   { opacity: 0; transform: translateY(-10px) scale(0.8); }
+  100% { opacity: 1; transform: translateY(0)   scale(1); }
 }
 
 .glass-btn {
@@ -158,13 +183,21 @@ body {
 .screen.hidden {
   opacity: 0;
   pointer-events: none;
-  transform: scale(0.95);
+  transform: scale(0.92);
 }
 
 .screen.active {
   opacity: 1;
   pointer-events: auto;
   transform: scale(1);
+  animation: screenZoomIn 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Zoom-in animation for every screen card on appearance */
+@keyframes screenZoomIn {
+  0%   { opacity: 0; transform: scale(0.82) translateY(18px); }
+  60%  { opacity: 1; transform: scale(1.03) translateY(-4px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 /* Glassmorphism Cards */
@@ -607,6 +640,28 @@ body {
   padding-bottom: 15px;
 }
 
+/* Modal header right-side action group (logout + close) */
+.modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Logout button in modal header */
+.logout-btn {
+  background: rgba(244, 67, 54, 0.18);
+  border-color: rgba(244, 67, 54, 0.5);
+  color: #ff8a80;
+  font-size: 0.85rem;
+  padding: 8px 14px;
+}
+
+.logout-btn:hover {
+  background: rgba(244, 67, 54, 0.38);
+  border-color: #f44336;
+  color: #fff;
+}
+
 .modal-header h2 {
   font-size: 1.6rem;
   color: #fff;
@@ -623,12 +678,15 @@ body {
 
 .close-btn:hover { color: var(--accent-pink); }
 
+/* ---- Admin Login Box (Req 2: proper spacing between label, input, button) ---- */
 .admin-login-box {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  max-width: 450px;
-  margin: 30px auto;
+  align-items: center;
+  gap: 14px;           /* 14px (~4mm) vertical spacing between each element */
+  max-width: 420px;
+  margin: 32px auto;
+  padding: 10px 0;
 }
 
 .glass-input {
@@ -653,10 +711,37 @@ body {
   font-size: 0.9rem;
 }
 
+/* Admin Login Label */
+.admin-login-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-sub);
+  letter-spacing: 0.5px;
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+/* Admin login submit button — full-width centered */
+.admin-login-btn {
+  width: 100%;
+  justify-content: center;
+  font-size: 1.1rem;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #ff4081 0%, #e91e63 100%);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(255, 64, 129, 0.5);
+}
+
+.admin-login-btn:hover {
+  box-shadow: 0 0 35px rgba(255, 64, 129, 0.85);
+  transform: translateY(-2px) scale(1.02);
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
+  margin-bottom: 28px;    /* Req 3: 28px spacing below stats cards */
 }
 
 .stat-card {
@@ -688,6 +773,7 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
+  margin-bottom: 28px;    /* Req 3: 28px spacing below charts section */
 }
 
 .chart-container {
@@ -709,7 +795,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 0;           /* top margin handled by charts-grid margin-bottom */
+  margin-bottom: 6px;
   flex-wrap: wrap;
   gap: 15px;
 }
@@ -780,6 +867,83 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-top: 15px;
+  margin-bottom: 8px;   /* Req 3: small bottom breathing room */
+}
+
+/* ==========================================================================
+   MUSIC TOGGLE BUTTON (Req 5)
+   ========================================================================== */
+.music-toggle-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle animated ring when music is ON */
+.music-toggle-btn.music-on {
+  border-color: var(--accent-pink);
+  box-shadow: 0 0 12px var(--accent-glow), 0 4px 15px rgba(0,0,0,0.3);
+  animation: musicPulse 2s ease-in-out infinite;
+}
+
+@keyframes musicPulse {
+  0%, 100% { box-shadow: 0 0 12px var(--accent-glow); }
+  50%       { box-shadow: 0 0 22px rgba(255, 64, 129, 0.85); }
+}
+
+/* ==========================================================================
+   HOME BUTTON (Req 6) — After Final Celebration
+   ========================================================================== */
+.home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 42px;
+  border-radius: 50px;
+  border: 2px solid rgba(255, 105, 180, 0.6);
+  background: linear-gradient(135deg, rgba(255, 64, 129, 0.25) 0%, rgba(233, 30, 99, 0.35) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  box-shadow: 0 0 18px rgba(255, 64, 129, 0.4), 0 8px 25px rgba(0,0,0,0.35);
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* Starts hidden; JS removes .hidden and adds .fade-in to trigger animation */
+  animation: none;
+  margin-top: 8px;
+}
+
+.home-btn.fade-in {
+  animation: homeBtnFadeIn 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes homeBtnFadeIn {
+  0%   { opacity: 0; transform: translateY(20px) scale(0.85); }
+  70%  { opacity: 1; transform: translateY(-4px) scale(1.04); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.home-btn:hover {
+  transform: translateY(-4px) scale(1.06);
+  border-color: var(--accent-pink);
+  box-shadow: 0 0 30px rgba(255, 64, 129, 0.7), 0 12px 35px rgba(0,0,0,0.45);
+  background: linear-gradient(135deg, rgba(255, 64, 129, 0.45) 0%, rgba(233, 30, 99, 0.55) 100%);
+}
+
+.home-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.home-btn.hidden {
+  display: none;
+}
+
+.home-btn-heart {
+  font-size: 1.4rem;
+  animation: heartPulse 1.2s infinite ease-in-out;
 }
 
 /* RESPONSIVE MEDIA QUERIES */

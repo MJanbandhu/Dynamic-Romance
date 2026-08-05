@@ -1,5 +1,6 @@
 import logging
 from backend.config import Config
+from backend.utils import format_ist
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +86,7 @@ def send_new_visitor_email(visitor):
     subject = "New Romantic Visitor 💖"
     pairs = {
         "Session ID": visitor.session_id,
-        "Visit Time": visitor.visit_timestamp.strftime("%Y-%m-%d %H:%M:%S UTC") if visitor.visit_timestamp else "N/A",
+        "Visit Time (IST)": format_ist(visitor.visit_timestamp),
         "Greeting": visitor.greeting or "N/A",
         "Word (Adjective)": visitor.adjective or "N/A",
         "Browser": visitor.browser,
@@ -104,7 +105,7 @@ def send_yes_clicked_email(visitor):
     subject = "Someone Clicked YES 💖"
     pairs = {
         "Status": "YES Button Clicked!",
-        "Time": visitor.yes_clicked_at.strftime("%Y-%m-%d %H:%M:%S UTC") if visitor.yes_clicked_at else "N/A",
+        "Time (IST)": format_ist(visitor.yes_clicked_at),
         "Session ID": visitor.session_id,
         "IP Address": visitor.ip_address,
         "Country": visitor.country,
@@ -123,7 +124,7 @@ def send_kiss_selected_email(visitor, kiss_choice):
     subject = f"Kiss Selection 💋 - {kiss_choice}"
     pairs = {
         "Selected Kiss Option": f"💋 {kiss_choice}",
-        "Date & Time": visitor.kiss_selected_at.strftime("%Y-%m-%d %H:%M:%S UTC") if visitor.kiss_selected_at else "N/A",
+        "Date & Time (IST)": format_ist(visitor.kiss_selected_at),
         "Session ID": visitor.session_id,
         "Greeting": visitor.greeting or "N/A",
         "IP Address": visitor.ip_address,

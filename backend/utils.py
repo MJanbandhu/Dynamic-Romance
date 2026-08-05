@@ -1,6 +1,26 @@
 import re
 import requests
+from datetime import datetime, timezone, timedelta
 from flask import request
+
+# ---- IST Timezone Helpers ----
+# Indian Standard Time = UTC + 05:30
+IST = timezone(timedelta(hours=5, minutes=30))
+
+def get_ist_now():
+    """Return the current datetime in Indian Standard Time (Asia/Kolkata, UTC+05:30)."""
+    return datetime.now(IST)
+
+def format_ist(dt):
+    """Format a datetime object as a readable IST string."""
+    if dt is None:
+        return "N/A"
+    # If datetime is naive (no tzinfo), assume UTC and convert to IST
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    ist_dt = dt.astimezone(IST)
+    return ist_dt.strftime("%Y-%m-%d %H:%M:%S IST")
+
 
 def get_client_ip(req):
     """Extract real client IP address from request headers (taking proxies into account)."""

@@ -24,11 +24,23 @@
   <canvas id="bgCanvas"></canvas>
   <canvas id="fxCanvas"></canvas>
 
-  <!-- Overlay Audio Toggle & Admin Lock -->
+  <!-- Background Audio Element (romantic guitar soundtrack) -->
+  <!-- Uses a royalty-free romantic guitar piece via CDN as fallback; JS handles autoplay & fade -->
+  <audio id="bgAudio" loop preload="auto">
+    <!-- Royalty-free soft guitar instrumental via jsDelivr-hosted CDN -->
+    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_1a609fded6.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Header: Music Toggle | Home (shown after celebration) | Admin -->
   <header class="app-header">
-    <button id="soundToggleBtn" class="glass-btn icon-btn" title="Toggle Romantic Ambient Music">
-      <span class="btn-icon">🎵</span>
-      <span id="soundLabel">Sound: Off</span>
+    <button id="soundToggleBtn" class="glass-btn icon-btn music-toggle-btn" title="Toggle Romantic Background Music">
+      <span class="btn-icon" id="musicIcon">🎵</span>
+      <span id="soundLabel">Music: Off</span>
+    </button>
+    <!-- Home button: hidden initially, shown in header after final celebration ends -->
+    <button id="homeBtn" class="glass-btn icon-btn home-header-btn header-hidden" title="Return to Home">
+      <span class="btn-icon">🏠</span>
+      <span>Home</span>
     </button>
     <button id="adminBtn" class="glass-btn icon-btn" title="Open Admin Dashboard">
       <span class="btn-icon">🔐</span>
@@ -90,7 +102,7 @@
         <div class="kiss-card glass-card" data-category="Forehead">
           <div class="kiss-icon">👑</div>
           <h3>Forehead</h3>
-          <p>Gentle & Sweet</p>
+          <p>Gentle &amp; Sweet</p>
           <div class="kiss-sparkle">✨</div>
         </div>
 
@@ -98,7 +110,7 @@
         <div class="kiss-card glass-card" data-category="Cheek">
           <div class="kiss-icon">😊</div>
           <h3>Cheek</h3>
-          <p>Cute & Playful</p>
+          <p>Cute &amp; Playful</p>
           <div class="kiss-sparkle">✨</div>
         </div>
 
@@ -114,7 +126,7 @@
         <div class="kiss-card glass-card" data-category="Lips">
           <div class="kiss-icon">💋</div>
           <h3>Lips</h3>
-          <p>Passionate & Romantic</p>
+          <p>Passionate &amp; Romantic</p>
           <div class="kiss-sparkle">✨</div>
         </div>
 
@@ -122,7 +134,7 @@
         <div class="kiss-card glass-card" data-category="Neck">
           <div class="kiss-icon">🦒</div>
           <h3>Neck</h3>
-          <p>Warm & Tingling</p>
+          <p>Warm &amp; Tingling</p>
           <div class="kiss-sparkle">✨</div>
         </div>
 
@@ -168,17 +180,22 @@
     <div class="modal-container glass-card">
       <div class="modal-header">
         <h2>🔐 Admin Analytics Dashboard</h2>
-        <button id="closeAdminModal" class="close-btn">&times;</button>
+        <div class="modal-header-actions">
+          <!-- Logout button: shown only when logged in -->
+          <button id="adminLogoutBtn" class="glass-btn logout-btn hidden" title="Logout from Admin">
+             Logout
+          </button>
+          <button id="closeAdminModal" class="close-btn">&times;</button>
+        </div>
       </div>
 
       <!-- Admin Login Form -->
       <div id="adminLoginForm" class="admin-login-box">
-        <p>Enter the admin password to access visitor tracking and statistics.</p>
-        <div class="form-group">
-          <input type="password" id="adminPasswordInput" placeholder="Enter Admin Password" class="glass-input">
-          <button id="adminLoginSubmitBtn" class="glow-btn">Login</button>
-        </div>
-        <p id="adminLoginError" class="error-msg hidden">Invalid Password. Please try again.</p>
+        <!-- Label: separate element for proper spacing (Req 2) -->
+        <label class="admin-login-label" for="adminPasswordInput">🔒 Enter Login Password</label>
+        <input type="password" id="adminPasswordInput" placeholder="Enter Admin Password" class="glass-input" autocomplete="current-password">
+        <button id="adminLoginSubmitBtn" class="glow-btn admin-login-btn">Login</button>
+        
       </div>
 
       <!-- Admin Dashboard Content (Hidden until authenticated) -->
@@ -234,7 +251,7 @@
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Time</th>
+                <th>Time (IST)</th>
                 <th>IP / Country</th>
                 <th>Browser / OS</th>
                 <th>Greeting</th>

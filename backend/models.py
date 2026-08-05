@@ -1,5 +1,5 @@
-from datetime import datetime
 from backend.database import db
+from backend.utils import get_ist_now
 
 class Visitor(db.Model):
     __tablename__ = 'visitors'
@@ -15,7 +15,7 @@ class Visitor(db.Model):
     
     greeting = db.Column(db.String(50), nullable=True)
     adjective = db.Column(db.String(50), nullable=True)
-    visit_timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    visit_timestamp = db.Column(db.DateTime, default=get_ist_now)
     
     yes_clicked = db.Column(db.Boolean, default=False)
     yes_clicked_at = db.Column(db.DateTime, nullable=True)
@@ -57,7 +57,7 @@ class Activity(db.Model):
     session_id = db.Column(db.String(100), db.ForeignKey('visitors.session_id'), nullable=False)
     event_name = db.Column(db.String(100), nullable=False)
     details = db.Column(db.Text, nullable=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=get_ist_now)
 
     def to_dict(self):
         return {
